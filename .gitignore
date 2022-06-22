@@ -1,2 +1,4 @@
 # Project exclude paths
 /.dart_tool/
+/testTb
+/testTb.bk
