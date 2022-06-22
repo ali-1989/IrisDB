@@ -1,0 +1,174 @@
+===================================================================================================
+Doc: kv
+
+{"k1":"v1","k2":"multi\n line","k3":{"s1":"iris","s2":2}}
+{"k1":"v1","k2":"v2","k3":{"s1":"db","s2":[1,2,3]}}
+{"k1":"v1","k2":"v2","k4":{"s1":"db","s2":[1,2]}}
+{"k1":"v1","k2":"iris","k4":[1,2,10]}
+===================================================================================================
+testFn:
+
+var con = Conditions();
+con.add(Condition(ConditionType.TestFn)..path = ['k3']..key = 's2'..testFn = (v) => v is! List);
+con.add(Condition(ConditionType.IN)..path = ['k3']..key = 's1'..value = ['iris', 'db']);
+
+var read = db.find('kv', con, path: ['k3']);
+==>   {s1: iris, s2: 2}
+
+var read = db.find('kv', con);
+==> {k1: v1, k2: multi\n line, k3: {s1: iris, s2: 2}}
+------------------------------------------------------------------
+var con = Conditions();
+con.add(Condition(ConditionType.TestFn)..path = ['k3']..key = 's2'..testFn = (v) => v is List);
+con.add(Condition(ConditionType.IN)..path = ['k3']..key = 's1'..value = ['iris', 'db']);
+
+var read = db.find('kv', con);
+==> {k1: v1, k2: v2, k3: {s1: db, s2: [1, 2, 3]}}
+===================================================================================================
+List index:
+
+var con = Conditions();
+con.add(Condition(ConditionType.TestFn)..path = ['k3']..key = 's2'..testFn = (v) => v is List);
+con.add(Condition(ConditionType.EQUAL)..path = ['k3','s2', 0]..value = 1);
+
+var read = db.find('kv', con);
+==> {k1: v1, k2: v2, k3: {s1: db, s2: [1, 2, 3]}}
+===================================================================================================
+GTE:
+
+var con = Conditions();
+con.add(Condition(ConditionType.TestFn)..path = ['k3']..key = 's2'..testFn = (v) => v is List);
+con.add(Condition(ConditionType.GTE)..path = ['k3','s2', 1]..value = 0);
+
+var read = db.find('kv', con);
+==> {k1: v1, k2: v2, k3: {s1: db, s2: [1, 2, 3]}}
+===================================================================================================
+RegExp:
+
+var con = Conditions();
+con.add(Condition(ConditionType.RegExp)..key = 'k2'..value = RegExp(r'i\wi.+'));
+
+var read = db.find('kv', con);
+==> {k1: v1, k2: iris, k4: [1, 2, 10]}
+===================================================================================================
+NotNull:
+
+var con = Conditions();
+con.add(Condition(ConditionType.IN)..key = 'k1'..value = ['v1', 'v2']);
+con.add(Condition(ConditionType.NotNull)..key = 'k4');
+
+var read = db.find('kv', con);
+==> {k1: v1, k2: v2, k4: {s1: db, s2: [1, 2]}}
+    {k1: v1, k2: iris, k4: [1, 2, 10]}
+
+===================================================================================================
+NotDefined:
+
+var con = Conditions();
+con.add(Condition(ConditionType.IN)..key = 'k1'..value = ['v1', 'v2']);
+con.add(Condition(ConditionType.NotDefined)..key = 'k4');
+
+var read = db.find('kv', con);
+==> {k1: v1, k2: multi\n line, k3: {s1: iris, s2: 2}}
+    {k1: v1, k2: v2, k3: {s1: db, s2: [1, 2, 3]}}
+-----------------------------------------------------------------
+var con = Conditions();
+con.add(Condition(ConditionType.NotNull)..key = 'k1');
+con.add(Condition(ConditionType.NotDefined)..key = 'k4');
+
+var read = db.find('kv', con);
+==> {k1: v1, k2: multi\n line, k3: {s1: iris, s2: 2}}
+    {k1: v1, k2: v2, k3: {s1: db, s2: [1, 2, 3]}}
+===================================================================================================
+
+
+
+
+
+
+
+===================================================================================================
+Equals:
+
+con.add(Condition(ConditionType.TestFn)..path = ['k3']..key = 's2'..testFn = (v) => v is List);
+isEqual:
+con.add(Condition(ConditionType.TestFn)..path = ['k3','s2']..testFn = (v) => v is List);
+
+===================================================================================================
+Or state:
+
+var con = Conditions();
+con.add(Condition()..key = 'k2'..value = 'v2');
+con.addOr(Condition(ConditionType.NotNull)..key = 'k3');
+con.addOr(Condition(ConditionType.NotNull)..key = 'k4');
+
+var read = db.find('kv', con);
+==> {k1: v1, k2: v2, k3: {s1: db, s2: [1, 2, 3]}}
+    {k1: v1, k2: v2, k4: {s1: db, s2: [1, 2]}}
+
+--------- is equal by -----------------
+var con = Conditions();
+con.add(Condition()..key = 'k2'..value = 'v2');
+con.addOr(Condition(ConditionType.NotDefined)..key = 'k3');
+con.addOr(Condition(ConditionType.NotDefined)..key = 'k4');
+
+var read = db.find('kv', con);
+==> {k1: v1, k2: v2, k3: {s1: db, s2: [1, 2, 3]}}
+    {k1: v1, k2: v2, k4: {s1: db, s2: [1, 2]}}
+===================================================================================================
+
+
+
+
+*********************************************************************************************************
+                    Update
+*********************************************************************************************************
+ByPath:
+
+var updateCon = Conditions();
+updateCon.add(Condition(ConditionType.RegExp)..path = ['k2']..value = RegExp(r'.*multi.*'));
+
+var updateCount = await db.update('kv', 'newK2', updateCon, path: ['k2']);
+===================================================================================================
+full Record:
+
+var updateCon = Conditions();
+updateCon.add(Condition(ConditionType.NotNull)..path = ['k4']..key = 's1');
+
+var updateCount = await db.update('kv', {"k1":"v1n","k2":"irisNew","k3":[1,2]}, updateCon);
+===================================================================================================
+update list:
+
+var updateCon = Conditions();
+
+var updateCount = await db.update('kv', 3, updateCon, path: ['k4', 2]);    //2: is index, 3: is new value
+ OR
+var updateCount = await db.update('kv', 4, null, path: ['k4', 2]);
+===================================================================================================
+
+
+
+
+
+
+*********************************************************************************************************
+                    delete
+*********************************************************************************************************
+
+var delCon = Conditions();
+delCon.add(Condition(ConditionType.NotNull)..path = ['k3']..key = 's1');
+ OR
+delCon.add(Condition(ConditionType.NotNull)..path = ['k3', 's1']);
+
+var delCount = await db.delete('kv', delCon);
+===============================================================================
+delete list item:
+
+var delCon = Conditions();
+delCon.add(Condition(ConditionType.IN)..path = ['k1']..value = ['v1', 's1']);
+
+var delCount = await db.delete('kv', delCon, path: ['k4', 0]);
+
+===============================================================================
+*********************************************************************************************************
+*********************************************************************************************************
