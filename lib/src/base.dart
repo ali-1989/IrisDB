@@ -14,7 +14,7 @@ import 'dbStub.dart'
 typedef OrderBy = int Function(JSON e1, JSON e2);
 //------------------------------------------------------------------------------------------------
 class IrisDB {
-  String _version = '1.2';
+  String _version = '1.3';
   String _dirPath = '';
   bool _debug = false;
   List<ResourceHolder> _openedDoc = [];
@@ -50,6 +50,10 @@ class IrisDB {
   }
 
   ResourceHolder _genNewResourceHolder(String docName){
+    if(_debug){
+      print('☼☼☼☼☼☼ IsisDB [start Generate Resource]: $docName');
+    }
+
     ResourceHolder rh = ResourceHolder();
     rh.rawName = docName;
 
@@ -62,6 +66,9 @@ class IrisDB {
       rh.filePath = _genPath(docName);
     }
 
+    if(_debug){
+      print('☼☼☼☼☼☼ IsisDB [End Generate Resource]: $docName');
+    }
     return rh;
   }
 
@@ -70,17 +77,23 @@ class IrisDB {
       return _openedDoc.firstWhere((element) => element.rawName == docName);
     }
     catch (e){
+      if(_debug){
+        print('☼☼☼☼☼☼ IsisDB [getDoc A]: $e');
+      }
       try {
         return _openedDoc.firstWhere((element) => element.name == docName);
       }
       catch (e){
+        if(_debug){
+          print('☼☼☼☼☼☼ IsisDB [getDoc B]: $e');
+        }
         return null;
       }
     }
   }
 
   String? _fetchVersion(String line){
-    var regExp = RegExp(r"version:\s*(.*?)(\s*,|\s+.*|$)",
+    final regExp = RegExp(r"version:\s*(.*?)(\s*,|\s+.*|$)",
       caseSensitive: false,
       multiLine: false,
     );
@@ -106,7 +119,7 @@ class IrisDB {
   }
 
   Future<bool> openDoc(String docName) async {
-    var rh = _genNewResourceHolder(docName);
+    final rh = _genNewResourceHolder(docName);
 
     if(_existDocByPath(rh.filePath)) {
       return Future.value(true);
@@ -114,8 +127,8 @@ class IrisDB {
 
     var data = await cross.openDoc(rh.filePath);
     //rh.json = json.decode(rh.dataStr);
-    if(_debug) {
-      print('@@@ Fetch(Open) @ ${rh.name}:\n$data');
+    if(_debug){
+      print('☼☼☼☼☼☼ IsisDB [Fetch-Open]: ${rh.name}\n > $data');
       print('@-------------END----------------');
     }
 
@@ -123,12 +136,16 @@ class IrisDB {
       return convert(rh, data);
     }
     catch (e){
+      if(_debug) {
+        print('☼☼☼☼☼☼ IsisDB [start OpenBackup]: ${rh.name}: | because >> $e');
+      }
+
       data = await cross.openDoc('${rh.filePath}.bk');
 
       if(_debug) {
-        print('@@@ Fetch(OpenBackup) @ ${rh.name}:\n$data');
-        print('@-------------END----------------');
+        print('☼☼☼☼☼☼ IsisDB [Backup]: ${rh.name}\n > $data');
       }
+
       return convert(rh, data);
     }
   }

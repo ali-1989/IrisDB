@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:path/path.dart' as p;
-import 'package:path/path.dart'; // work with path address
 
 class PathHelper{
   PathHelper._();
@@ -87,7 +86,7 @@ class PathHelper{
         path = path.replaceAll(RegExp('(?<!:)/{2,}'), '/');
       }
     }
-    catch (e){
+    catch (e){ // on Web
       path = path!.replaceAll(RegExp(r'\\'), '/');
       path = path.replaceAll(RegExp('(?<!:)/{2,}'), '/');
     }
@@ -123,17 +122,17 @@ class PathHelper{
   }
 
   static String? joinWindows(String path1, String path2) {
-    var context = p.Context(style: Style.windows);
-    context.join(path1, path2);
+    final context = p.Context(style: p.Style.windows);
+    return context.join(path1, path2);
   }
 
   static String? joinMacLinux(String path1, String path2) {
-    var context = p.Context(style: Style.posix);
-    context.join(path1, path2);
+    final context = p.Context(style: p.Style.posix);
+    return context.join(path1, path2);
   }
 
   static String? join(String path1, String path2) {
-    var context = p.Context(style: Style.platform);
-    context.join(path1, path2);
+    final context = p.Context(style: p.Style.platform);
+    return context.join(path1, path2);
   }
 }
