@@ -1,43 +1,63 @@
-import 'package:file/file.dart';
-import 'package:file/memory.dart';
 import 'dart:html';
-//import 'dart:io';
+//import 'dart:indexed_db';
 
-Future<String> openDoc(String path){
+Future<String> openDoc(String path) async {
   print('☼☼☼☼☼☼ IsisDB [web-openDoc]: $path');
-  final f = MemoryFileSystem().file(path);
-  print('☼☼☼☼☼☼ IsisDB [web-openDoc] B');
-  //if(!f.existsSync()) {
-    f.createSync(recursive: true);
-  //}
+  /*if (IdbFactory.supported){
+    window.indexedDB!.open(path, version: 1)
+  }*/
+
+  if (window.localStorage.containsKey(path)){
+    return window.localStorage[path]!;
+  }
+
   print('☼☼☼☼☼☼ IsisDB [web-openDoc] C');
-  return f.readAsString();
+  return '';
 }
 
 Future<bool> writeDoc(String path, String data, bool backup){
-  final f = MemoryFileSystem().file(path);
+  if (window.localStorage.containsKey(path)){
+    if(backup){
+      final oldBk = '$path.bk';
 
-  if(!f.existsSync()) {
-    f.createSync(recursive: true);
+      try {
+        window.localStorage.remove(oldBk);
+        window.localStorage[oldBk] = window.localStorage[path]!;
+      }
+      catch (e){/**/}
+    }
   }
 
-  return f.writeAsString(data, mode: FileMode.writeOnly, flush: true)
-      .then((value) => true);
+  window.localStorage[path] = data;
+
+  return Future.value(true);
 }
 
 Future<bool> appendDoc(String path, String data, bool backup){
-  File f = MemoryFileSystem().file(path);
+  if (window.localStorage.containsKey(path)){
+    if(backup){
+      final oldBk = '$path.bk';
 
-  if(!f.existsSync()) {
-    f.createSync(recursive: true);
+      try {
+        window.localStorage.remove(oldBk);
+        window.localStorage[oldBk] = window.localStorage[path]!;
+      }
+      catch (e){/**/}
+    }
+
+    window.localStorage[path] = window.localStorage[path]! + data;
+  }
+  else {
+    window.localStorage[path] = data;
   }
 
-  return f.writeAsString(data, mode: FileMode.writeOnlyAppend, flush: true)
-      .then((value) => true);
-  //throw UnsupportedError('Cannot append DB file.');
+  return Future.value(true);
 }
 
 Future<String> deleteDoc(String path) async {
-  await MemoryFileSystem().file(path).delete();
+  if (window.localStorage.containsKey(path)){
+    window.localStorage.remove(path);
+  }
+
   return path;
 }
