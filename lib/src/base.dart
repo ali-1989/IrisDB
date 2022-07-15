@@ -609,7 +609,7 @@ class IrisDB {
     }
 
     if(_debug) {
-      print('@@@ Write @ ${rh.name}:\n$w');
+      print('☼☼☼☼☼☼ Write @ ${rh.name}:\n$w');
       print('@---------------------------');
     }
 
@@ -619,7 +619,7 @@ class IrisDB {
 
   Future<bool> _append(String path, ResourceHolder rh, String data) {
     if(_debug) {
-      print('@@@ Append @ ${rh.name}:\n$data');
+      print('☼☼☼☼☼☼ Append @ ${rh.name}:\n$data');
       print('@---------------------------');
     }
 

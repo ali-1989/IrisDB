@@ -22,7 +22,7 @@ Future<bool> writeDoc(String path, String data, bool backup){
         window.localStorage.remove(oldBk);
         window.localStorage[oldBk] = window.localStorage[path]!;
       }
-      catch (e){}
+      catch (e){/**/}
     }
   }
 
@@ -40,7 +40,7 @@ Future<bool> appendDoc(String path, String data, bool backup){
         window.localStorage.remove(oldBk);
         window.localStorage[oldBk] = window.localStorage[path]!;
       }
-      catch (e){}
+      catch (e){/**/}
     }
 
     window.localStorage[path] = window.localStorage[path]! + data;
