@@ -158,7 +158,7 @@ class IrisDB {
     LineSplitter ls = LineSplitter();
     List<String> temp = ls.convert(data);
 
-    for(var line in temp){
+    for(final line in temp){
       if(_isJson(line)) {
         rh.records.add(JSON.parse(line));
       }
@@ -166,7 +166,8 @@ class IrisDB {
 
     if(temp.isEmpty){
       rh.isEmptyFile = true;
-    } else {
+    }
+    else {
       rh.fileVersion = _fetchVersion(temp[0]);
       rh.fileDate = _fetchDate(temp[0]);
     }
