@@ -3,12 +3,13 @@ import 'package:file/memory.dart';
 import 'dart:io';
 
 Future<String> openDoc(String path){
+  print('☼☼☼☼☼☼ IsisDB [web-openDoc]: $path');
   final f = MemoryFileSystem().file(path);
-
+  print('☼☼☼☼☼☼ IsisDB [web-openDoc] B');
   if(!f.existsSync()) {
     f.createSync(recursive: true);
   }
-
+  print('☼☼☼☼☼☼ IsisDB [web-openDoc] C');
   return f.readAsString();
 }
 

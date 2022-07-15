@@ -67,7 +67,7 @@ class IrisDB {
     }
 
     if(_debug){
-      print('☼☼☼☼☼☼ IsisDB [End Generate Resource]: $docName');
+      print('☼☼☼☼☼☼ IsisDB [End Generate Resource]: $docName | ${rh.name}, ${rh.filePath}');
     }
     return rh;
   }
@@ -125,11 +125,15 @@ class IrisDB {
       return Future.value(true);
     }
 
+    if(_debug){
+      print('☼☼☼☼☼☼ IsisDB [start read doc]: ${rh.name}');
+    }
+
     var data = await cross.openDoc(rh.filePath);
     //rh.json = json.decode(rh.dataStr);
     if(_debug){
-      print('☼☼☼☼☼☼ IsisDB [Fetch-Open]: ${rh.name}\n > $data');
-      print('@-------------END----------------');
+      print('☼☼☼☼☼☼ IsisDB [data is]: ${rh.name}\n > $data');
+      print('@-------------END of Data----------------');
     }
 
     try{
