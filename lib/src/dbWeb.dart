@@ -10,7 +10,6 @@ Future<String> openDoc(String path) async {
     return window.localStorage[path]!;
   }
 
-  print('☼☼☼☼☼☼ IsisDB [web---openDoc] ');
   return '';
 }
 
