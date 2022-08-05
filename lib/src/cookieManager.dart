@@ -13,7 +13,7 @@ class CookieManager {
 
   static void addCookie(String key, String value) {
     /// this command add or replace a cookie to cookies
-    document.cookie = '$key="$value"; max-age=2147483647; path=/;';
+    document.cookie = '$key=${Uri.encodeComponent(value)}; max-age=2147483647; path=/;';
   }
 
   static String getCookie(String key) {
@@ -28,7 +28,7 @@ class CookieManager {
 
       if (key == _key) {
         if(kv.length > 1){
-          return kv[1];
+          return Uri.decodeComponent(kv[1]);
         }
 
         return '';
