@@ -1,61 +1,45 @@
-import 'dart:html';
+import 'package:iris_db/src/cookieManager.dart';
 //import 'dart:indexed_db';
 
 Future<String> openDoc(String path) async {
-  /*if (IdbFactory.supported){
-    window.indexedDB!.open(path, version: 1)
-  }*/
+  // window.indexedDB  >  not supported in some browsers
+  // window.localStorage  > it is remove by close session
 
-  if (window.localStorage.containsKey(path)){
-    return window.localStorage[path]!;
-  }
-
-  return '';
+  return CookieManager.getCookie(path);
 }
 
 Future<bool> writeDoc(String path, String data, bool backup){
-  if (window.localStorage.containsKey(path)){
-    if(backup){
-      final oldBk = '$path.bk';
+  if(backup){
+    final oldBk = '$path.bk';
 
-      try {
-        window.localStorage.remove(oldBk);
-        window.localStorage[oldBk] = window.localStorage[path]!;
-      }
-      catch (e){/**/}
-    }
+    final cur = CookieManager.getCookie(path);
+    //CookieManager.clear(oldBk);
+    CookieManager.addCookie(oldBk, cur);
   }
 
-  window.localStorage[path] = data;
+  CookieManager.addCookie(path, data);
 
   return Future.value(true);
 }
 
 Future<bool> appendDoc(String path, String data, bool backup){
-  if (window.localStorage.containsKey(path)){
-    if(backup){
-      final oldBk = '$path.bk';
+  final cur = CookieManager.getCookie(path);
+  final newData = cur + data;
 
-      try {
-        window.localStorage.remove(oldBk);
-        window.localStorage[oldBk] = window.localStorage[path]!;
-      }
-      catch (e){/**/}
-    }
+  if(backup){
+    final oldBk = '$path.bk';
 
-    window.localStorage[path] = window.localStorage[path]! + data;
+    //CookieManager.clear(oldBk);
+    CookieManager.addCookie(oldBk, cur);
   }
-  else {
-    window.localStorage[path] = data;
-  }
+
+  CookieManager.addCookie(path, newData);
 
   return Future.value(true);
 }
 
 Future<String> deleteDoc(String path) async {
-  if (window.localStorage.containsKey(path)){
-    window.localStorage.remove(path);
-  }
+  CookieManager.clear(path);
 
   return path;
 }

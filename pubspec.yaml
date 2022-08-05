@@ -1,5 +1,5 @@
 name: iris_db
-version: 0.0.4
+version: 0.0.5+1
 description: A json DB.
 # homepage: https://www.example.com
 
@@ -9,7 +9,7 @@ environment:
 dependencies:
   file: ^6.1.2
   path: ^1.8.2
-  g_json: ^4.1.0    # 4.0.0
+  g_json: ^4.1.0
 
 dev_dependencies:
   test: ^1.21.4
