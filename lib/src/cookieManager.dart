@@ -47,7 +47,7 @@ class CookieManager {
       final _key = kv[0].trim();
 
       if (key == _key) {
-        document.cookie = '$key=0; max-age=0;';
+        document.cookie = '$key; max-age=0;';
         break;
       }
     }
@@ -61,7 +61,7 @@ class CookieManager {
       final kv = item.split('=');
       final key = kv[0].trim();
 
-      document.cookie = '$key=0; max-age=0;';
+      document.cookie = '$key; max-age=0;';
     }
 
     // final d = window.location.hostname?.split(".")?? [];
