@@ -238,7 +238,7 @@ class IrisDB {
     }
   }
 
-  List<dynamic> find(String docName, Conditions? conditions, {
+  List<T> find<T>(String docName, Conditions? conditions, {
     List path = const [],
     int? limit,
     int? offset,
@@ -247,7 +247,7 @@ class IrisDB {
     }) {
     ResourceHolder rh = _getDoc(docName)!;
 
-    List res = [];
+    List<T> res = <T>[];
     int skip = 0;
 
     /*var sourceList = rh.records;
@@ -279,7 +279,7 @@ class IrisDB {
         }
 
         if(outType == OutType.JSON)
-          res.add(v);
+          res.add(v.value as T);
         else
           res.add(json.decode(v.rawString()));
       }
@@ -303,7 +303,7 @@ class IrisDB {
           }
 
           if(outType == OutType.JSON)
-            res.add(v);
+            res.add(v.value as T);
           else
             res.add(json.decode(v.rawString()));
         }
@@ -313,7 +313,7 @@ class IrisDB {
     return res;
   }
 
-  dynamic first(String docName, Conditions? conditions, {
+  T? first<T>(String docName, Conditions? conditions, {
     List path = const [],
     int? offset,
     OutType outType = OutType.MapOrDynamic,

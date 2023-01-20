@@ -7,9 +7,9 @@ environment:
   sdk: '>=2.15.0'
 
 dependencies:
-  file: ^6.1.2
-  path: ^1.8.2
+  file: ^6.1.4
+  path: ^1.8.3
   g_json: ^4.1.0
 
 dev_dependencies:
-  test: ^1.21.4
+  test: ^1.22.2
