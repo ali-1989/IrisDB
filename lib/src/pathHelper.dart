@@ -79,19 +79,55 @@ class PathHelper{
       if (Platform.isWindows) {
         path = path.replaceAll(RegExp(r'/'), r'\');
         path = path.replaceAll(RegExp(r'^(\\+)'), ''); //.replaceAll(RegExp('^(/+)'), '');
-        path = path.replaceAll(RegExp(r'(?<!:)\\{2,}'), r'\');
+        path = remove2BackSlash(path);
       }
       else {
         path = path.replaceAll(RegExp(r'\\'), '/');
-        path = path.replaceAll(RegExp('(?<!:)/{2,}'), '/');
+        path = remove2Slash(path);
       }
     }
     catch (e){ // on Web
       path = path!.replaceAll(RegExp(r'\\'), '/');
-      path = path.replaceAll(RegExp('(?<!:)/{2,}'), '/');
+      path = remove2Slash(path);
     }
 
     return path;
+  }
+
+  static String? remove2Slash(String? url) {
+    if(url == null){
+      return null;
+    }
+
+    //path = path.replaceAll(RegExp('(?<!:)/{2,}'), '/'); some browser not support
+    int findStart = url.indexOf('://');
+
+    if(findStart < 0){
+      return url.replaceAll(RegExp('/{2,}'), '/');
+    }
+
+    var p1 = url.substring(0, findStart+3);
+    var p2 = url.substring(findStart+3);
+
+    return p1 + p2.replaceAll(RegExp('/{2,}'), '/');
+  }
+
+  static String? remove2BackSlash(String? url) {
+    if(url == null){
+      return null;
+    }
+
+    //path = path.replaceAll(RegExp(r'(?<!:)\\{2,}'), r'\');; some browser not support
+    int findStart = url.indexOf(':\\\\');
+
+    if(findStart < 0){
+      return url.replaceAll(RegExp('\\{2,}'), '\\');
+    }
+
+    var p1 = url.substring(0, findStart+3);
+    var p2 = url.substring(findStart+3);
+
+    return p1 + p2.replaceAll(RegExp('\\{2,}'), '\\');
   }
 
   /// change multi / or \ to one
