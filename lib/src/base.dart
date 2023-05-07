@@ -14,12 +14,18 @@ import 'dbStub.dart'
 typedef OrderBy = int Function(JSON e1, JSON e2);
 //------------------------------------------------------------------------------------------------
 class IrisDB {
-  String _version = '1.3';
+  String _version = '1.4';
   String _dirPath = '';
   bool _debug = false;
   List<ResourceHolder> _openedDoc = [];
 
+  bool get _kIsWeb => bool.fromEnvironment('dart.library.js_util');
+
   IrisDB({String? filesPath}){
+    if (_kIsWeb && filesPath == null){
+      throw Exception('IrisDB: on Web you must set file path');
+    }
+
     if(filesPath != null){
       _dirPath = filesPath;
     }
