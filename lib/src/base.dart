@@ -19,10 +19,12 @@ class IrisDB {
   bool _debug = false;
   List<ResourceHolder> _openedDoc = [];
 
-  bool get _kIsWeb => bool.fromEnvironment('dart.library.js_util');
+  bool _kIsWeb(){
+    return bool.fromEnvironment('dart.library.js_util');
+  }
 
   IrisDB({String? filesPath}){
-    if (_kIsWeb && filesPath == null){
+    if (_kIsWeb() && filesPath == null){
       throw Exception('IrisDB: on Web you must set file path');
     }
 
