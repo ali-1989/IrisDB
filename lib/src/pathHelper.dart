@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:path/path.dart' as p;
 
-class PathHelper{
+class PathHelper {
   PathHelper._();
 
   // dir/f.js  >> f.js

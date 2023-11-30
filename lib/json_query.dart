@@ -11,7 +11,7 @@ class JsonQuery {
     OutType outType = OutType.MapOrDynamic,
   }) {
 
-    var row = JSON(jsonMap);
+    final row = JSON(jsonMap);
     var v = row[path];
 
     if(v.error != null){
@@ -49,7 +49,7 @@ class JsonQuery {
   }
 
   static dynamic updateAs(Map jsonMap, dynamic value, Conditions? conditions, {List path = const []}) {
-    var row = JSON(jsonMap);
+    final row = JSON(jsonMap);
     var rowPath = row[path];
 
     if(rowPath.error != null){
@@ -75,7 +75,7 @@ class JsonQuery {
     if(passConditions){
       if(path.isEmpty){
         if(value is Map){
-          for(var me in value.entries){
+          for(final me in value.entries){
             row[me.key] = me.value;
           }
         }
@@ -85,7 +85,7 @@ class JsonQuery {
       }
       else {
         if(value is Map){
-          for(var me in value.entries){
+          for(final me in value.entries){
             rowPath[me.key] = me.value; //row[path][me.key] = me.value;
           }
         }
@@ -99,7 +99,7 @@ class JsonQuery {
   }
 
   static dynamic deleteAs(Map jsonMap, List path, Conditions? conditions) {
-    var row = JSON(jsonMap);
+    final row = JSON(jsonMap);
     var v = row[path];
 
     if(path.isEmpty || v.error != null){

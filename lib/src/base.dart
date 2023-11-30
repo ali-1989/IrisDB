@@ -10,11 +10,11 @@ import 'dbStub.dart'
   if (dart.library.html) 'dbWeb.dart' as cross;
 
 
-//------------------------------------------------------------------------------------------------
+
 typedef OrderBy = int Function(JSON e1, JSON e2);
-//------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 class IrisDB {
-  String _version = '1.4';
+  String _version = '1.5';
   String _dirPath = '';
   bool _debug = false;
   List<ResourceHolder> _openedDoc = [];
@@ -42,7 +42,7 @@ class IrisDB {
   }
 
   bool _hasPath(String docName){
-    return docName.contains(RegExp(r'(/|\\)'));
+    return docName.contains(RegExp(r'([/\\])'));
   }
 
   bool _existDocByPath(String path){
@@ -87,14 +87,14 @@ class IrisDB {
     }
     catch (e){
       if(_debug){
-        print('☼☼☼☼☼☼ IsisDB [getDoc A]: $e');
+        print('☼☼☼☼☼☼ IsisDB [getDoc, start]: $e');
       }
       try {
         return _openedDoc.firstWhere((element) => element.name == docName);
       }
       catch (e){
         if(_debug){
-          print('☼☼☼☼☼☼ IsisDB [getDoc B]: $e');
+          print('☼☼☼☼☼☼ IsisDB [getDoc, end]: $e');
         }
         return null;
       }
@@ -270,7 +270,7 @@ class IrisDB {
       rh.records.sort(orderBy);
     }
 
-    for(var row in rh.records){
+    for(final row in rh.records){
       if(limit != null && res.length >= limit){
         break;
       }
@@ -338,23 +338,24 @@ class IrisDB {
         orderBy: orderBy,
     );
 
-    if(findRes.isEmpty)
+    if(findRes.isEmpty) {
       return null;
+    }
 
     return findRes.first;
   }
 
   Future<int> insert(String docName, Map value) async {
-    ResourceHolder rh = _getDoc(docName)!;
-    var j = JSON(value);
+    final rh = _getDoc(docName)!;
+    final j = JSON(value);
     rh.records.add(j);
 
     if(rh.isEmptyFile){
-      var isOk = await _write(rh.filePath, rh);
+      final isOk = await _write(rh.filePath, rh);
       return isOk? 1: 0;
     }
     else {
-      var isOk = await _append(rh.filePath, rh, j.rawString());
+      final isOk = await _append(rh.filePath, rh, j.rawString());
       return isOk ? 1 : 0;
     }
   }
@@ -394,7 +395,7 @@ class IrisDB {
       if(passConditions){
         if(path.isEmpty){
           if(value is Map){
-            for(var me in value.entries){
+            for(final me in value.entries){
               /// if [me.value] == null, this command remove key
               row[me.key] = me.value;
               //row.value[me.key] = me.value;
@@ -406,7 +407,7 @@ class IrisDB {
         }
         else {
           if(value is Map){
-            for(var me in value.entries){
+            for(final me in value.entries){
               cell[me.key] = me.value; //row[path][me.key] = me.value;
             }
           }
@@ -496,7 +497,7 @@ class IrisDB {
     int count = 0;
 
     for(var i=0; i< rh.records.length; i++){
-      var row = rh.records.elementAt(i);
+      final row = rh.records.elementAt(i);
       var v = row[path];
 
       if(v.error != null){
@@ -613,7 +614,7 @@ class IrisDB {
   Future<bool> _write(String path, ResourceHolder rh) {
     String w = 'Version: ${rh.fileVersion}, date: ${rh.fileDate}';
 
-    for(var r in rh.records){
+    for(final r in rh.records){
       w += "\n" + r.rawString();
     }
 

@@ -1,8 +1,8 @@
 import 'package:g_json/g_json.dart';
 
 class Conditions {
-  List<Condition> _andList = [];
-  List<List<Condition>> _orList = [];
+  final List<Condition> _andList = [];
+  final List<List<Condition>> _orList = [];
   bool exceptionSafe = true;
 
   bool get isEmpty {
@@ -35,14 +35,14 @@ class Conditions {
     var res = '[Conditions]\n';
     res += ' - AND:\n';
 
-    for(var i in _andList){
+    for(final i in _andList){
       res += ' -- (${i.type}) ${i.key} : ${i.value},  path:${i.path}\n';
     }
 
     res += ' - OR:\n';
 
-    for(var i in _orList){
-      for(var j in i){
+    for(final i in _orList){
+      for(final j in i){
         res += ' -- (${j.type}) ${j.key} : ${j.value},  path:${j.path}\n';
       }
       res += ' ----------\n';
@@ -53,7 +53,7 @@ class Conditions {
     return res;
   }
 }
-///======================================================================================================
+///=============================================================================
 enum ConditionType {
   EQUAL,
   DefinedIsNull,
@@ -63,10 +63,10 @@ enum ConditionType {
   NotEqual,
   IN,
   NotIn,
-  GT,
-  GTE,
-  LT,
-  LTE,
+  GT, /// for numbers
+  GTE, /// for numbers
+  LT, /// for numbers
+  LTE, /// for numbers
   TestFn,
   RegExp,
   IsEmpty,
@@ -76,7 +76,7 @@ enum ConditionType {
   IsBeforeTs,
   IsAfterTs,
 }
-///================================================================================================
+///=============================================================================
 class Condition {
   ConditionType type = ConditionType.EQUAL;
   String? key;
@@ -95,7 +95,7 @@ class Condition {
     return '[Condition] -> ($type)  $key : $value,   path:$path';
   }
 }
-///================================================================================================
+///=============================================================================
 bool hasCondition(dynamic value, Conditions condition){
 
   bool check(List<Condition> list, bool isAnd) {
@@ -288,18 +288,22 @@ bool hasCondition(dynamic value, Conditions condition){
           break;
       //---------------------------------------------------------
         case ConditionType.IsTrue:
-          if(checker is bool)
+          if(checker is bool) {
             res &= checker;
-          else
+          }
+          else {
             res &= false;
+          }
 
           break;
       //---------------------------------------------------------
         case ConditionType.IsFalse:
-          if(checker is bool)
+          if(checker is bool) {
             res &= !checker;
-          else
+          }
+          else {
             res &= false;
+          }
 
           break;
       //---------------------------------------------------------
@@ -308,10 +312,12 @@ bool hasCondition(dynamic value, Conditions condition){
             checker = tsToSystemDate(checker);
           }
 
-          if(checker is DateTime)
+          if(checker is DateTime) {
             res &= checker.isBefore(con.value);
-          else
+          }
+          else {
             res &= false;
+          }
 
           break;
       //---------------------------------------------------------
@@ -320,10 +326,12 @@ bool hasCondition(dynamic value, Conditions condition){
             checker = tsToSystemDate(checker);
           }
 
-          if(checker is DateTime)
+          if(checker is DateTime) {
             res &= checker.isAfter(con.value);
-          else
+          }
+          else {
             res &= false;
+          }
 
           break;
       //---------------------------------------------------------
@@ -356,14 +364,14 @@ bool hasCondition(dynamic value, Conditions condition){
   }
 
   if(allRes) {
-    for(var consList in condition.orConditions){
+    for(final consList in condition.orConditions){
       allRes &= check(consList, false);
     }
   }
 
   return allRes;
 }
-///================================================================================================
+///=============================================================================
 DateTime? tsToSystemDate(String? ts){
   if(ts == null){
     return null;

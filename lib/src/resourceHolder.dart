@@ -10,7 +10,7 @@ class ResourceHolder {
   List<JSON> records = [];
 
   ResourceHolder cloneWithoutRecords(){
-    var res = ResourceHolder();
+    final res = ResourceHolder();
     res.name = name;
     res.filePath = filePath;
     res.fileVersion = fileVersion;
