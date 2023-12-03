@@ -326,8 +326,17 @@ bool hasCondition(dynamic value, Conditions condition){
             checker = tsToSystemDate(checker);
           }
 
+          DateTime v;
+          if(con.value is String){
+            v = tsToSystemDate(con.value)!;
+          }
+          else {
+            v = con.value;
+          }
+
+
           if(checker is DateTime) {
-            res &= checker.isAfter(con.value);
+            res &= checker.isAfter(v);
           }
           else {
             res &= false;
