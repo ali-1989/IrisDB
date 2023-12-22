@@ -266,6 +266,17 @@ class IrisDB {
       sourceList.sort(orderBy);
     }*/
 
+    if(_debug){
+      var txt = '☼☼☼☼☼☼ IsisDB [find]\n';
+      txt += 'doc: $docName\n';
+      txt += 'limit: $limit\n';
+      txt += 'offset: $offset\n';
+      txt += 'outType: ${outType.name}\n';
+      txt += 'with orderBy: ${orderBy != null}\n';
+
+      print(txt);
+    }
+
     if(orderBy != null) {
       rh.records.sort(orderBy);
     }
@@ -297,9 +308,13 @@ class IrisDB {
 
         try{
           //passConditions = hasCondition(v.value, conditions);
-          passConditions = hasCondition(row.value, conditions);
+          passConditions = hasCondition(row.value, conditions, _debug);
         }
         catch (e){
+          if(_debug){
+            print('☼☼☼☼☼☼ IsisDB Error: $e');
+          }
+
           if(!conditions.exceptionSafe){
             rethrow;
           }

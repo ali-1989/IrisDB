@@ -96,298 +96,328 @@ class Condition {
   }
 }
 ///=============================================================================
-bool hasCondition(dynamic value, Conditions condition){
+bool hasCondition(dynamic value, Conditions condition, bool debug){
+  if(debug){
+    var txt = '☼☼☼☼☼☼ IsisDB [conditions check]\n';
+    txt += 'AND condition count: ${condition.andConditions.length}\n';
+    txt += 'OR condition count: ${condition.orConditions.length}\n';
+    txt += 'value type: ${value.runtimeType}\n';
+    txt += '@---------------------------------\n';
 
-  bool check(List<Condition> list, bool isAnd) {
-    bool res = true;
-    dynamic obj = value;
-
-    for(var i = 0; i < list.length; i++) {
-      var con = list.elementAt(i);
-
-      if (con.path != null && con.path!.isNotEmpty) {
-        var j = JSON(value);
-        j = j[con.path];
-
-        if (j.error == null) {
-          obj = j.value;
-        }
-        else {
-          if(isAnd || i == list.length-1) {
-            res = false;
-            break;
-          }
-          else
-            continue;
-        }
-      }
-
-      var checker;
-
-      if (obj is Map && con.key != null) {
-        checker = obj[con.key];
-      }
-      else{
-        checker = obj;
-      }
-
-      switch (con.type) {
-        case ConditionType.EQUAL:
-          if(con.value is BigInt){
-            res &= BigInt.parse(checker.toString()) == con.value;
-          }
-          else {
-            res &= checker == con.value;
-          }
-
-          break;
-      //---------------------------------------------------------
-        case ConditionType.NotEqual:
-          if(con.value is BigInt){
-            res &= BigInt.parse(checker.toString()) == con.value;
-          }
-          else {
-            res &= checker != con.value;
-          }
-
-          break;
-      //---------------------------------------------------------
-        case ConditionType.NotDefinedKey:
-          if (obj is Map && con.key != null) {
-            res &= !obj.containsKey(con.key);
-          }
-          else
-            res &= false;
-
-          break;
-      //---------------------------------------------------------
-        case ConditionType.DefinedKey:
-          if (obj is Map && con.key != null) {
-            res &= obj.containsKey(con.key);
-          }
-          else
-            res &= false;
-
-          break;
-      //---------------------------------------------------------
-        case ConditionType.DefinedIsNull:
-          if (obj is Map && con.key != null) {
-            res &= obj.containsKey(con.key) && obj[con.key] == null;
-          }
-          else //because is not defined key
-            res &= false;
-
-          break;
-      //---------------------------------------------------------
-        case ConditionType.DefinedNotNull:
-          if (obj is Map && con.key != null) {
-            if(con.value == null) {
-              res &= obj.containsKey(con.key) && obj[con.key] != null;
-            }
-            else {
-              res &= obj.containsKey(con.key) && obj[con.key] == con.value;
-            }
-          }
-          else //because is not defined key
-            res &= false;
-
-          break;
-      //---------------------------------------------------------
-        case ConditionType.IN:
-          if((con.value as List) is List<BigInt>){
-            res &= (con.value as List).contains(BigInt.parse(checker.toString()));
-          }
-          else {
-            res &= (con.value as List).contains(checker);
-          }
-
-          break;
-      //---------------------------------------------------------
-        case ConditionType.NotIn:
-          if((con.value as List) is List<BigInt>){
-            res &= !(con.value as List).contains(BigInt.parse(checker.toString()));
-          }
-          else {
-            res &= !(con.value as List).contains(checker);
-          }
-
-          break;
-      //---------------------------------------------------------
-        case ConditionType.GT:
-          if(con.value is BigInt){
-            res &= (con.value < BigInt.parse(checker.toString()));
-          }
-          else {
-            res &= (con.value as num) < checker;
-          }
-
-          break;
-      //---------------------------------------------------------
-        case ConditionType.GTE:
-          if(con.value is BigInt){
-            res &= (con.value <= BigInt.parse(checker.toString()));
-          }
-          else {
-            res &= (con.value as num) <= checker;
-          }
-
-          break;
-      //---------------------------------------------------------
-        case ConditionType.LT:
-          if(con.value is BigInt){
-            res &= (con.value > BigInt.parse(checker.toString()));
-          }
-          else {
-            res &= (con.value as num) > checker;
-          }
-
-          break;
-      //---------------------------------------------------------
-        case ConditionType.LTE:
-          if(con.value is BigInt){
-            res &= (con.value >= BigInt.parse(checker.toString()));
-          }
-          else {
-            res &= (con.value as num) >= checker;
-          }
-
-          break;
-      //---------------------------------------------------------
-        case ConditionType.TestFn:
-          res &= con.testFn!(checker);
-
-          break;
-      //---------------------------------------------------------
-        case ConditionType.RegExp:
-          res &= (con.value as RegExp).hasMatch(checker);
-
-          break;
-      //---------------------------------------------------------
-        case ConditionType.IsEmpty:
-          if(checker is String)
-            res &= checker.isEmpty;
-          else if(checker is List)
-            res &= checker.isEmpty;
-          else if(checker is Map)
-            res &= checker.isEmpty;
-          else
-            res &= false;
-
-          break;
-      //---------------------------------------------------------
-        case ConditionType.IsNotEmpty:
-          if(checker is String)
-            res &= checker.isNotEmpty;
-          else if(checker is List)
-            res &= checker.isNotEmpty;
-          else if(checker is Map)
-            res &= checker.isNotEmpty;
-          else
-            res &= false;
-
-          break;
-      //---------------------------------------------------------
-        case ConditionType.IsTrue:
-          if(checker is bool) {
-            res &= checker;
-          }
-          else {
-            res &= false;
-          }
-
-          break;
-      //---------------------------------------------------------
-        case ConditionType.IsFalse:
-          if(checker is bool) {
-            res &= !checker;
-          }
-          else {
-            res &= false;
-          }
-
-          break;
-      //---------------------------------------------------------
-        case ConditionType.IsBeforeTs:
-          if(checker is String){
-            checker = tsToSystemDate(checker);
-          }
-
-          DateTime v;
-          if(con.value is String){
-            v = tsToSystemDate(con.value)!;
-          }
-          else {
-            v = con.value;
-          }
-
-          if(checker is DateTime) {
-            res &= checker.isBefore(v);
-          }
-          else {
-            res &= false;
-          }
-
-          break;
-      //---------------------------------------------------------
-        case ConditionType.IsAfterTs:
-          if(checker is String){
-            checker = tsToSystemDate(checker);
-          }
-
-          DateTime v;
-          if(con.value is String){
-            v = tsToSystemDate(con.value)!;
-          }
-          else {
-            v = con.value;
-          }
-
-
-          if(checker is DateTime) {
-            res &= checker.isAfter(v);
-          }
-          else {
-            res &= false;
-          }
-
-          break;
-      //---------------------------------------------------------
-        default:
-          res &= false;
-      }
-
-      if(!res){
-        if(isAnd || i == list.length-1){
-          return false;
-        }
-        else {
-          res = true;
-        }
-      }
-      else {
-        if(!isAnd){
-          return true;
-        }
-      }
-    }
-
-    return res;
+    print(txt);
   }
+
 
   var allRes = true;
 
   if(condition.andConditions.isNotEmpty) {
-    allRes &= check(condition.andConditions, true);
+    allRes &= _check(condition.andConditions, value, true, debug);
   }
 
   if(allRes) {
     for(final consList in condition.orConditions){
-      allRes &= check(consList, false);
+      allRes &= _check(consList, value,false, debug);
     }
   }
 
   return allRes;
 }
+
+bool _check(List<Condition> conditions, dynamic value, bool isAnd, bool debug) {
+  bool res = true;
+  dynamic curValue = value;
+  var debugTxt = '☼☼☼☼☼☼ IsisDB [check]\n';
+
+  for(var i = 0; i < conditions.length; i++) {
+    var con = conditions.elementAt(i);
+
+    if (con.path != null && con.path!.isNotEmpty) {
+      debugTxt += 'with path: ${con.path}\n';
+
+      var j = JSON(value);
+      j = j[con.path];
+
+      if (j.error == null) {
+        curValue = j.value;
+      }
+      else {
+        debugTxt += '::path error:: ${j.error}\n\n';
+
+        if(isAnd || i == conditions.length-1) {
+          res = false;
+          break;
+        }
+        else {
+          continue;
+        }
+      }
+    }
+
+    var checkWith;
+
+    if (curValue is Map && con.key != null) {
+      checkWith = curValue[con.key];
+    }
+    else{
+      checkWith = curValue;
+    }
+
+    debugTxt += 'condition type: ${con.type.name}\n';
+    debugTxt += 'data type: ${checkWith.runtimeType}\n';
+
+    switch (con.type) {
+      case ConditionType.EQUAL:
+        if(con.value is BigInt){
+          res &= BigInt.parse(checkWith.toString()) == con.value;
+        }
+        else {
+          res &= checkWith == con.value;
+        }
+
+        break;
+    //---------------------------------------------------------
+      case ConditionType.NotEqual:
+        if(con.value is BigInt){
+          res &= BigInt.parse(checkWith.toString()) == con.value;
+        }
+        else {
+          res &= checkWith != con.value;
+        }
+
+        break;
+    //---------------------------------------------------------
+      case ConditionType.NotDefinedKey:
+        if (curValue is Map && con.key != null) {
+          res &= !curValue.containsKey(con.key);
+        }
+        else
+          res &= false;
+
+        break;
+    //---------------------------------------------------------
+      case ConditionType.DefinedKey:
+        if (curValue is Map && con.key != null) {
+          res &= curValue.containsKey(con.key);
+        }
+        else
+          res &= false;
+
+        break;
+    //---------------------------------------------------------
+      case ConditionType.DefinedIsNull:
+        if (curValue is Map && con.key != null) {
+          res &= curValue.containsKey(con.key) && curValue[con.key] == null;
+        }
+        else //because is not defined key
+          res &= false;
+
+        break;
+    //---------------------------------------------------------
+      case ConditionType.DefinedNotNull:
+        if (curValue is Map && con.key != null) {
+          if(con.value == null) {
+            res &= curValue.containsKey(con.key) && curValue[con.key] != null;
+          }
+          else {
+            res &= curValue.containsKey(con.key) && curValue[con.key] == con.value;
+          }
+        }
+        else { //because is not defined key
+          res &= false;
+        }
+
+        break;
+    //---------------------------------------------------------
+      case ConditionType.IN:
+        if(con.value is List){
+          if((con.value as List) is List<BigInt>){
+            res &= (con.value as List).contains(BigInt.parse(checkWith.toString()));
+          }
+          else {
+            res &= (con.value as List).contains(checkWith);
+          }
+        }
+
+        break;
+    //---------------------------------------------------------
+      case ConditionType.NotIn:
+        if(con.value is List){
+          if((con.value as List) is List<BigInt>){
+            res &= !(con.value as List).contains(BigInt.parse(checkWith.toString()));
+          }
+          else {
+            res &= !(con.value as List).contains(checkWith);
+            debugTxt += 'NotIn result: $res\n';
+          }
+        }
+
+        break;
+    //---------------------------------------------------------
+      case ConditionType.GT:
+        if(con.value is BigInt){
+          res &= (con.value < BigInt.parse(checkWith.toString()));
+        }
+        else {
+          res &= (con.value as num) < checkWith;
+        }
+
+        break;
+    //---------------------------------------------------------
+      case ConditionType.GTE:
+        if(con.value is BigInt){
+          res &= (con.value <= BigInt.parse(checkWith.toString()));
+        }
+        else {
+          res &= (con.value as num) <= checkWith;
+        }
+
+        break;
+    //---------------------------------------------------------
+      case ConditionType.LT:
+        if(con.value is BigInt){
+          res &= (con.value > BigInt.parse(checkWith.toString()));
+        }
+        else {
+          res &= (con.value as num) > checkWith;
+        }
+
+        break;
+    //---------------------------------------------------------
+      case ConditionType.LTE:
+        if(con.value is BigInt){
+          res &= (con.value >= BigInt.parse(checkWith.toString()));
+        }
+        else {
+          res &= (con.value as num) >= checkWith;
+        }
+
+        break;
+    //---------------------------------------------------------
+      case ConditionType.TestFn:
+        res &= con.testFn!(checkWith);
+
+        break;
+    //---------------------------------------------------------
+      case ConditionType.RegExp:
+        res &= (con.value as RegExp).hasMatch(checkWith);
+
+        break;
+    //---------------------------------------------------------
+      case ConditionType.IsEmpty:
+        if(checkWith is String)
+          res &= checkWith.isEmpty;
+        else if(checkWith is List)
+          res &= checkWith.isEmpty;
+        else if(checkWith is Map)
+          res &= checkWith.isEmpty;
+        else
+          res &= false;
+
+        break;
+    //---------------------------------------------------------
+      case ConditionType.IsNotEmpty:
+        if(checkWith is String)
+          res &= checkWith.isNotEmpty;
+        else if(checkWith is List)
+          res &= checkWith.isNotEmpty;
+        else if(checkWith is Map)
+          res &= checkWith.isNotEmpty;
+        else
+          res &= false;
+
+        break;
+    //---------------------------------------------------------
+      case ConditionType.IsTrue:
+        if(checkWith is bool) {
+          res &= checkWith;
+        }
+        else {
+          res &= false;
+        }
+
+        break;
+    //---------------------------------------------------------
+      case ConditionType.IsFalse:
+        if(checkWith is bool) {
+          res &= !checkWith;
+        }
+        else {
+          res &= false;
+        }
+
+        break;
+    //---------------------------------------------------------
+      case ConditionType.IsBeforeTs:
+        if(checkWith is String){
+          checkWith = tsToSystemDate(checkWith);
+        }
+
+        DateTime v;
+        if(con.value is String){
+          v = tsToSystemDate(con.value)!;
+        }
+        else {
+          v = con.value;
+        }
+
+        if(checkWith is DateTime) {
+          res &= checkWith.isBefore(v);
+        }
+        else {
+          res &= false;
+        }
+
+        break;
+    //---------------------------------------------------------
+      case ConditionType.IsAfterTs:
+        if(checkWith is String){
+          checkWith = tsToSystemDate(checkWith);
+        }
+
+        DateTime v;
+        if(con.value is String){
+          v = tsToSystemDate(con.value)!;
+        }
+        else {
+          v = con.value;
+        }
+
+
+        if(checkWith is DateTime) {
+          res &= checkWith.isAfter(v);
+        }
+        else {
+          res &= false;
+        }
+
+        break;
+    //---------------------------------------------------------
+      default:
+        res &= false;
+    }
+
+    if(debug){
+      print(debugTxt);
+    }
+
+    if(!res){
+      if(isAnd || i == conditions.length-1){
+        return false;
+      }
+      else {
+        res = true;
+      }
+    }
+    else {
+      if(!isAnd){
+        return true;
+      }
+    }
+  }
+
+  return res;
+}
+
 ///=============================================================================
 DateTime? tsToSystemDate(String? ts){
   if(ts == null){
