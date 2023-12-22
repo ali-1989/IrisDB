@@ -96,12 +96,12 @@ class Condition {
   }
 }
 ///=============================================================================
-bool hasCondition(dynamic value, Conditions condition, bool debug){
+bool hasCondition(dynamic record, Conditions condition, bool debug){
   if(debug){
-    var txt = '☼☼☼☼☼☼ IsisDB [conditions check]\n';
+    var txt = '☼☼☼☼☼☼☼☼☼☼☼☼ IsisDB [conditions check]  ☼☼☼☼☼☼☼☼☼☼☼☼\n';
     txt += 'AND condition count: ${condition.andConditions.length}\n';
     txt += 'OR condition count: ${condition.orConditions.length}\n';
-    txt += 'value type: ${value.runtimeType}\n';
+    txt += 'Record type: ${record.runtimeType}\n';
     txt += '@---------------------------------\n';
 
     print(txt);
@@ -111,12 +111,12 @@ bool hasCondition(dynamic value, Conditions condition, bool debug){
   var allRes = true;
 
   if(condition.andConditions.isNotEmpty) {
-    allRes &= _check(condition.andConditions, value, true, debug);
+    allRes &= _check(condition.andConditions, record, true, debug);
   }
 
   if(allRes) {
     for(final consList in condition.orConditions){
-      allRes &= _check(consList, value,false, debug);
+      allRes &= _check(consList, record,false, debug);
     }
   }
 
@@ -126,7 +126,7 @@ bool hasCondition(dynamic value, Conditions condition, bool debug){
 bool _check(List<Condition> conditions, dynamic value, bool isAnd, bool debug) {
   bool res = true;
   dynamic curValue = value;
-  var debugTxt = '☼☼☼☼☼☼ IsisDB [check]\n';
+  var debugTxt = '☼☼☼☼☼☼☼☼☼☼☼☼ IsisDB [check] ☼☼☼☼☼☼☼☼☼☼☼☼\n';
 
   for(var i = 0; i < conditions.length; i++) {
     var con = conditions.elementAt(i);
@@ -163,7 +163,12 @@ bool _check(List<Condition> conditions, dynamic value, bool isAnd, bool debug) {
     }
 
     debugTxt += 'condition type: ${con.type.name}\n';
+    debugTxt += 'condition key type: ${con.key?.runtimeType}\n';
+    debugTxt += 'condition key: ${con.key}\n';
+    debugTxt += 'condition value type: ${con.value?.runtimeType}\n';
+    debugTxt += 'condition value: ${con.value}\n';
     debugTxt += 'data type: ${checkWith.runtimeType}\n';
+    debugTxt += 'data: ${checkWith}\n';
 
     switch (con.type) {
       case ConditionType.EQUAL:
@@ -247,7 +252,6 @@ bool _check(List<Condition> conditions, dynamic value, bool isAnd, bool debug) {
           }
           else {
             res &= !(con.value as List).contains(checkWith);
-            debugTxt += 'NotIn result: $res\n';
           }
         }
 
@@ -397,6 +401,8 @@ bool _check(List<Condition> conditions, dynamic value, bool isAnd, bool debug) {
     }
 
     if(debug){
+      debugTxt += '--------------------- end check: result: $res\n';
+
       print(debugTxt);
     }
 

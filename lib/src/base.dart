@@ -60,7 +60,7 @@ class IrisDB {
 
   ResourceHolder _genNewResourceHolder(String docName){
     if(_debug){
-      print('☼☼☼☼☼☼ IsisDB [start Generate Resource]: $docName');
+      print('☼☼☼☼☼☼☼☼☼☼☼☼ IrisDB [start Generate Resource]: $docName');
     }
 
     ResourceHolder rh = ResourceHolder();
@@ -76,7 +76,7 @@ class IrisDB {
     }
 
     if(_debug){
-      print('☼☼☼☼☼☼ IsisDB [End Generate Resource]: $docName | ${rh.name}, ${rh.filePath}');
+      print('☼☼☼☼☼☼☼☼☼☼☼☼ IrisDB [End Generate Resource]: $docName | ${rh.name}, ${rh.filePath}');
     }
     return rh;
   }
@@ -87,14 +87,14 @@ class IrisDB {
     }
     catch (e){
       if(_debug){
-        print('☼☼☼☼☼☼ IsisDB [getDoc, start]: $e');
+        print('☼☼☼☼☼☼☼☼☼☼☼☼ IrisDB [getDoc, start]: $e');
       }
       try {
         return _openedDoc.firstWhere((element) => element.name == docName);
       }
       catch (e){
         if(_debug){
-          print('☼☼☼☼☼☼ IsisDB [getDoc, end]: $e');
+          print('☼☼☼☼☼☼☼☼☼☼☼☼ IrisDB [getDoc, end]: $e');
         }
         return null;
       }
@@ -135,13 +135,13 @@ class IrisDB {
     }
 
     if(_debug){
-      print('☼☼☼☼☼☼ IsisDB [start read doc]: ${rh.name}');
+      print('☼☼☼☼☼☼☼☼☼☼☼☼ IrisDB [start read doc]: ${rh.name}');
     }
 
     var data = await cross.openDoc(rh.filePath);
     //rh.json = json.decode(rh.dataStr);
     if(_debug){
-      print('☼☼☼☼☼☼ IsisDB [data is]: ${rh.name}\n > $data');
+      print('☼☼☼☼☼☼☼☼☼☼☼☼ IrisDB [data is]: ${rh.name}\n > $data');
       print('@-------------END of Data----------------');
     }
 
@@ -150,13 +150,13 @@ class IrisDB {
     }
     catch (e){
       if(_debug) {
-        print('☼☼☼☼☼☼ IsisDB [start OpenBackup]: ${rh.name}: | because >> $e');
+        print('☼☼☼☼☼☼☼☼☼☼☼☼ IrisDB [start OpenBackup]: ${rh.name}: | because >> $e');
       }
 
       data = await cross.openDoc('${rh.filePath}.bk');
 
       if(_debug) {
-        print('☼☼☼☼☼☼ IsisDB [Backup]: ${rh.name}\n > $data');
+        print('☼☼☼☼☼☼☼☼☼☼☼☼ IrisDB [Backup]: ${rh.name}\n > $data');
       }
 
       return convert(rh, data);
@@ -267,7 +267,7 @@ class IrisDB {
     }*/
 
     if(_debug){
-      var txt = '☼☼☼☼☼☼ IsisDB [find]\n';
+      var txt = '☼☼☼☼☼☼☼☼☼☼☼☼ IrisDB [find]\n';
       txt += 'doc: $docName\n';
       txt += 'limit: $limit\n';
       txt += 'offset: $offset\n';
@@ -312,7 +312,7 @@ class IrisDB {
         }
         catch (e){
           if(_debug){
-            print('☼☼☼☼☼☼ IsisDB Error: $e');
+            print('☼☼☼☼☼☼☼☼☼☼☼☼ IrisDB Error: $e');
           }
 
           if(!conditions.exceptionSafe){
@@ -395,10 +395,14 @@ class IrisDB {
 
       try{
         if(conditions != null && !conditions.isEmpty) {
-          passConditions = hasCondition(row.value, conditions);
+          passConditions = hasCondition(row.value, conditions, _debug);
         }
       }
       catch (e){
+        if(_debug){
+          print('☼☼☼☼☼☼☼☼☼☼☼☼ IrisDB Error: $e');
+        }
+
         if(!conditions!.exceptionSafe){
           rethrow;
         }
@@ -470,9 +474,13 @@ class IrisDB {
         bool passConditions = false;
 
         try{
-          passConditions = hasCondition(row.value, conditions);
+          passConditions = hasCondition(row.value, conditions, _debug);
         }
         catch (e){
+          if(_debug){
+            print('☼☼☼☼☼☼☼☼☼☼☼☼ IrisDB Error: $e');
+          }
+
           if(!conditions.exceptionSafe){
             rethrow;
           }
@@ -510,6 +518,14 @@ class IrisDB {
     ResourceHolder rh = _getDoc(docName)!;
     List<int> mustDelete = [];
     int count = 0;
+
+    if(_debug){
+      var txt = '☼☼☼☼☼☼☼☼☼☼☼☼ IrisDB [delete]\n';
+      txt += 'doc: $docName\n';
+      txt += 'paths: ${path.length}\n';
+
+      print(txt);
+    }
 
     for(var i=0; i< rh.records.length; i++){
       final row = rh.records.elementAt(i);
@@ -557,12 +573,20 @@ class IrisDB {
 
         try{
           //passConditions = hasCondition(v.value, conditions);
-          passConditions = hasCondition(row.value, conditions);
+          passConditions = hasCondition(row.value, conditions, _debug);
         }
         catch (e){
+          if(_debug){
+            print('☼☼☼☼☼☼☼☼☼☼☼☼ IrisDB Delete Error: $e');
+          }
+
           if(!conditions.exceptionSafe){
             rethrow;
           }
+        }
+
+        if(_debug){
+          print('☼☼☼☼☼☼☼☼☼☼☼☼ IrisDB, can delete data: $passConditions');
         }
 
         if(passConditions){
@@ -601,10 +625,19 @@ class IrisDB {
       }
     }
 
+    var debugTxt = '☼☼☼☼☼☼☼☼☼☼☼☼ IrisDB, delete count Queue:${mustDelete.length}, $count\n';
+    debugTxt += 'before delete > count: ${rh.records.length}\n';
+
     int removed = 0;
     for(int idx in mustDelete){
       rh.records.removeAt(idx-removed);
       removed++;
+    }
+
+    debugTxt += 'after delete > count: ${rh.records.length}';
+
+    if(_debug){
+      print(debugTxt);
     }
 
     if(mustDelete.length + count > 0) {
@@ -634,7 +667,7 @@ class IrisDB {
     }
 
     if(_debug) {
-      print('☼☼☼☼☼☼ Write @ ${rh.name}:\n$w');
+      print('☼☼☼☼☼☼☼☼☼☼☼☼ IrisDB Write @ ${rh.name}:\n$w');
       print('@---------------------------');
     }
 
@@ -644,7 +677,7 @@ class IrisDB {
 
   Future<bool> _append(String path, ResourceHolder rh, String data) {
     if(_debug) {
-      print('☼☼☼☼☼☼ Append @ ${rh.name}:\n$data');
+      print('☼☼☼☼☼☼☼☼☼☼☼☼ IrisDB Append @ ${rh.name}:\n$data');
       print('@---------------------------');
     }
 
