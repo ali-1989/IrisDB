@@ -9,6 +9,7 @@ class JsonQuery {
   static dynamic find(Map jsonMap, Conditions? conditions, {
     List path = const [],
     OutType outType = OutType.MapOrDynamic,
+    bool debug = false,
   }) {
 
     final row = JSON(jsonMap);
@@ -29,7 +30,7 @@ class JsonQuery {
 
       try{
         //passConditions = hasCondition(v.value, conditions);
-        passConditions = hasCondition(row.value, conditions);
+        passConditions = hasCondition(row.value, conditions, debug);
       }
       catch (e){
         if(!conditions.exceptionSafe){
@@ -48,7 +49,10 @@ class JsonQuery {
     return null;
   }
 
-  static dynamic updateAs(Map jsonMap, dynamic value, Conditions? conditions, {List path = const []}) {
+  static dynamic updateAs(Map jsonMap, dynamic value, Conditions? conditions,
+      {List path = const [],
+        bool debug = false,
+      }) {
     final row = JSON(jsonMap);
     var rowPath = row[path];
 
@@ -60,7 +64,7 @@ class JsonQuery {
 
     try{
       if(conditions != null && !conditions.isEmpty) {
-        passConditions = hasCondition(row.value, conditions);
+        passConditions = hasCondition(row.value, conditions, debug);
       }
     }
     catch (e){
@@ -98,7 +102,7 @@ class JsonQuery {
     return json.decode(row.rawString());
   }
 
-  static dynamic deleteAs(Map jsonMap, List path, Conditions? conditions) {
+  static dynamic deleteAs(Map jsonMap, List path, Conditions? conditions, {bool debug = false,}) {
     final row = JSON(jsonMap);
     var v = row[path];
 
@@ -136,7 +140,7 @@ class JsonQuery {
       bool passConditions = false;
 
       try{
-        passConditions = hasCondition(row.value, conditions);
+        passConditions = hasCondition(row.value, conditions, debug);
       }
       catch (e){
         if(!conditions.exceptionSafe){
